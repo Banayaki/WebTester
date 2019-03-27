@@ -12,7 +12,7 @@ public class ArgParser {
 
     private void parse(String[] args) {
         if (args.length != 1)
-            throw new IllegalArgumentException("Wrong launch parameters");
+            throw new IllegalArgumentException("Wrong launch parameters. You're entered: " + args.length);
 
         configPath = args[0];
 

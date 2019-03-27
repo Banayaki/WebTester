@@ -8,28 +8,22 @@
       "url": "https://google.com"
     },
     {
-      "action": "click",
-      "type": "xpath",
-      "target": "//*[@id=\"sb_ifc0\"]",
-      "desc": "Click element"
-    },
-    {
       "action": "setValue",
       "type": "xpath",
       "value": "Netcracker",
-      "target": "//*[@id=\"sb_ifc0\"]",
+      "target": "//*[@id=\"tsf\"]/div[2]/div/div[1]/div/div[1]/input",
       "desc": "Set text value"
     },
     {
       "action": "click",
       "type": "xpath",
-      "target": "//*[@id=\"tsf\"]/div[2]/div[3]/center/input[1]",
+      "target": "//*[@id=\"tsf\"]/div[2]/div/div[3]/center/input[1]",
       "desc": "Click search button"
     },
     {
       "action": "click",
       "type": "xpath",
-      "target": "//*[@id=\"rso\"]/div[1]/div/div/div/h3/a",
+      "target": "//*[@id=\"rso\"]/div/div/div[1]/div/div/div[1]/a/h3",
       "desc": "Click first result"
     },
     {

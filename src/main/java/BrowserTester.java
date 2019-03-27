@@ -13,7 +13,8 @@ public class BrowserTester {
         ArgParser argParser = new ArgParser(args);
         DriverLoader driverLoader = new DefaultDriverLoader();
 
-
+        JsonTask jsonTask = new JsonTask(argParser.getConfigPath(), driverLoader);
+        jsonTask.solveTask();
     }
 
 }

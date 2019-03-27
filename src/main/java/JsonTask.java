@@ -1,6 +1,9 @@
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -10,14 +13,19 @@ import java.util.Map;
 public class JsonTask {
 
     private Map options;
-    private JSONObject task;
+    private JSONArray task;
+    private DriverLoader driverLoader;
+    private WebDriverWait driverWait;
+    private WebDriver driver;
+    private WebElement currentElement;
 
     public JsonTask(String configPath, DriverLoader driverLoader) {
-
+        this.driverLoader = driverLoader;
+        createTaskFromFile(configPath);
     }
 
     public void createTaskFromFile(String path) {
-        BufferedReader reader = null;
+        BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(new File(path)));
 
@@ -29,13 +37,13 @@ public class JsonTask {
 
 
             JSONObject json = new JSONObject(stringBuilder.toString());
-            task = json;
 
             if (!json.has("option") || !json.has("task"))
                 throw new JSONException("Incorrect json format");
 
+            task = json.getJSONArray("task");
+
             options = parseOption(json.getJSONObject("option"));
-            parseTask(json.getJSONArray("task"));
 
         } catch (FileNotFoundException ignored) {
         } catch (IOException e) {
@@ -43,7 +51,21 @@ public class JsonTask {
         }
     }
 
-    private void parseTask(JSONArray task) {
+    public void solveTask() {
+        if (task == null)
+            throw new NullPointerException("Test configuration not loaded");
+
+        driver = driverLoader.getWebDriverFor((String) options.get("browser"));
+        if (options.containsKey("wait"))
+            driverWait = new WebDriverWait(driver, (Long) options.get("time"));
+        else
+            driverWait = new WebDriverWait(driver, 10);
+
+        parseTask();
+        driver.quit();
+    }
+
+    private void parseTask() {
         for (Object o : task) {
             JSONObject json = (JSONObject) o;
             String action = json.getString("action");
@@ -56,18 +78,34 @@ public class JsonTask {
     }
 
     private void doClick(JSONObject json) {
+        String findMethod = json.getString("type");
+        String target = json.getString("target");
+
+        if (findMethod.equals("xpath"))
+            driver.findElement(By.xpath(target)).click();
 
     }
 
     private void doSetValue(JSONObject json) {
+        String findMethod = json.getString("type");
+        String target = json.getString("target");
+        String value = json.getString("value");
 
+        if (findMethod.equals("xpath"))
+            driver.findElement(By.xpath(target)).sendKeys(value);
     }
 
     private void doOpenUrl(JSONObject json) {
-
+        driver.get(json.getString("url"));
     }
 
     private void doScreenshot(JSONObject json) {
+        File tmp = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        try {
+            FileUtils.copyFile(tmp, new File(json.getString("fileName").concat(".png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
