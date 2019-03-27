@@ -2,30 +2,40 @@
   "option": {
     "browser": "chrome"
   },
-  "openUrl": "https://google.com",
-  "click": {
-    "type": "xpath",
-    "target": "//*[@id=\"sb_ifc0\"]",
-    "desc": "Click element"
-  },
-  "setValue": {
-    "type": "xpath",
-    "value": "Netcracker",
-    "target": "//*[@id=\"sb_ifc0\"]",
-    "desc": "Set text value"
-  },
-  "click": {
-    "type": "xpath",
-    "target": "//*[@id=\"tsf\"]/div[2]/div[3]/center/input[1]",
-    "desc": "Click search button"
-  },
-  "click": {
-    "type": "xpath",
-    "target": "//*[@id=\"rso\"]/div[1]/div/div/div/h3/a",
-    "desc": "Click first result"
-  },
-  "screenshot": {
-    "fileName": "screen_1",
-    "desc": "Take screenshot"
-  }
+  "task": [
+    {
+      "action": "openUrl",
+      "url": "https://google.com"
+    },
+    {
+      "action": "click",
+      "type": "xpath",
+      "target": "//*[@id=\"sb_ifc0\"]",
+      "desc": "Click element"
+    },
+    {
+      "action": "setValue",
+      "type": "xpath",
+      "value": "Netcracker",
+      "target": "//*[@id=\"sb_ifc0\"]",
+      "desc": "Set text value"
+    },
+    {
+      "action": "click",
+      "type": "xpath",
+      "target": "//*[@id=\"tsf\"]/div[2]/div[3]/center/input[1]",
+      "desc": "Click search button"
+    },
+    {
+      "action": "click",
+      "type": "xpath",
+      "target": "//*[@id=\"rso\"]/div[1]/div/div/div/h3/a",
+      "desc": "Click first result"
+    },
+    {
+      "action": "screenshot",
+      "fileName": "screen_1",
+      "desc": "Take screenshot"
+    }
+  ]
 }

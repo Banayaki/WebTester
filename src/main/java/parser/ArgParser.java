@@ -4,7 +4,6 @@ import java.io.File;
 
 public class ArgParser {
 
-    private String browserName;
     private String configPath;
 
     public ArgParser(String[] args) {
@@ -12,11 +11,10 @@ public class ArgParser {
     }
 
     private void parse(String[] args) {
-        if (args.length != 2)
+        if (args.length != 1)
             throw new IllegalArgumentException("Wrong launch parameters");
 
-        browserName = args[0];
-        configPath = args[1];
+        configPath = args[0];
 
         checkExist(configPath);
     }
@@ -24,10 +22,6 @@ public class ArgParser {
     private void checkExist(String path) {
         if (!new File(path).exists())
             throw new IllegalArgumentException(path + " File does not exist!");
-    }
-
-    public String getBrowserName() {
-        return browserName;
     }
 
     public String getConfigPath() {

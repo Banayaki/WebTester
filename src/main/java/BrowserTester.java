@@ -13,7 +13,7 @@ public class BrowserTester {
         ArgParser argParser = new ArgParser(args);
         DriverLoader driverLoader = new DefaultDriverLoader();
 
-        driverLoader.getWebDriverFor(argParser.getBrowserName());
+
     }
 
 }
