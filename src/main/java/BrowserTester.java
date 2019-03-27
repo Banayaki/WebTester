@@ -16,5 +16,4 @@ public class BrowserTester {
         JsonTask jsonTask = new JsonTask(argParser.getConfigPath(), driverLoader);
         jsonTask.solveTask();
     }
-
 }

@@ -27,6 +27,11 @@
       "desc": "Click first result"
     },
     {
+      "action": "checkElementVisible",
+      "type": "xpath",
+      "target": "//*[@id=\"main-menu\"]/div/div[1]/a"
+    },
+    {
       "action": "screenshot",
       "fileName": "screen_1",
       "desc": "Take screenshot"

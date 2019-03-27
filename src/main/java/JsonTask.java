@@ -2,39 +2,62 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+/**
+ * Класс выполняющий тестирование следуя конфигурации указанной в json-файле
+ */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class JsonTask {
 
+    /**
+     * Карта с опциями запуска теста (на данный момент используется для познания, какой браузер используем
+     */
     private Map options;
+    /**
+     * Загруженная в память конфигурация теста
+     */
     private JSONArray task;
+    /**
+     * Загрузчик WebDriver
+     */
     private DriverLoader driverLoader;
-    private WebDriverWait driverWait;
+    /**
+     * Драйвер целевого браузера
+     */
     private WebDriver driver;
-    private WebElement currentElement;
 
+    /**
+     * @param configPath   - путь до конфигурации тестирования
+     * @param driverLoader - объект - загрузчик драйвера
+     */
     public JsonTask(String configPath, DriverLoader driverLoader) {
         this.driverLoader = driverLoader;
         createTaskFromFile(configPath);
     }
 
+    /**
+     * Загружает задание
+     *
+     * @param path - путь до конфигурации тестирования
+     */
     public void createTaskFromFile(String path) {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(new File(path)));
 
-
             String line;
             StringBuilder stringBuilder = new StringBuilder();
             while ((line = reader.readLine()) != null)
                 stringBuilder.append(line);
-
 
             JSONObject json = new JSONObject(stringBuilder.toString());
 
@@ -47,58 +70,102 @@ public class JsonTask {
 
         } catch (FileNotFoundException ignored) {
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
+    /**
+     * Запускает тестирование
+     */
     public void solveTask() {
         if (task == null)
             throw new NullPointerException("Test configuration not loaded");
 
         driver = driverLoader.getWebDriverFor((String) options.get("browser"));
-        if (options.containsKey("wait"))
-            driverWait = new WebDriverWait(driver, (Long) options.get("time"));
-        else
-            driverWait = new WebDriverWait(driver, 10);
 
         parseTask();
         driver.quit();
     }
 
+    /**
+     * По очередно выполняет каждое задание
+     */
     private void parseTask() {
         for (Object o : task) {
             JSONObject json = (JSONObject) o;
             String action = json.getString("action");
+
+            System.out.println("Do [action: " + action +
+                    (json.has("desc") ? ", desc: " + json.getString("desc") + "]" : "]"));
             doAction(action, json);
         }
     }
 
+    /**
+     * Сохраняет параметры конфигурации в карту
+     *
+     * @param option - json объект с параметрами конфигурации
+     * @return - карта параметров
+     */
     private Map parseOption(JSONObject option) {
         return option.toMap();
     }
 
+    /**
+     * Метод находящий на текущей странице элемент (поддерживает все типы локаторов, поддерживаемые классом By
+     *
+     * @param findMethod - тип локатора (xpath e.g.)
+     * @param target     - искомый элемент
+     * @return - указатель на элемент
+     * @see By
+     */
+    private By getDesiredElement(String findMethod, String target) {
+        By desired = null;
+        try {
+            Method method = By.class.getMethod(findMethod, String.class);
+            desired = (By) method.invoke(null, target);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return desired;
+    }
+
+    /**
+     * Поддержка тестирования клика по элементу страницы
+     * @param json - параметры необходимые для прохождения теста
+     */
     private void doClick(JSONObject json) {
         String findMethod = json.getString("type");
         String target = json.getString("target");
 
-        if (findMethod.equals("xpath"))
-            driver.findElement(By.xpath(target)).click();
-
+        driver.findElement(getDesiredElement(findMethod, target)).click();
     }
 
+    /**
+     * Поддержка вставки текста в тег
+     * @param json - параметры необходимые для прохождения теста
+     */
     private void doSetValue(JSONObject json) {
         String findMethod = json.getString("type");
         String target = json.getString("target");
         String value = json.getString("value");
 
-        if (findMethod.equals("xpath"))
-            driver.findElement(By.xpath(target)).sendKeys(value);
+        driver.findElement(getDesiredElement(findMethod, target)).sendKeys(value);
     }
 
+    /**
+     * Открытие указанной веб-страницы
+     * @param json - параметры необходимые для прохождения теста
+     */
     private void doOpenUrl(JSONObject json) {
         driver.get(json.getString("url"));
     }
 
+    /**
+     * Скриншот текущего содержимого
+     * @param json - параметры необходимые для прохождения теста
+     */
     private void doScreenshot(JSONObject json) {
         File tmp = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
@@ -106,13 +173,32 @@ public class JsonTask {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Проверяет отображен ли элемент на странице
+     * @param json - параметры необходимые для прохождения теста
+     */
     private void doCheckElementVisible(JSONObject json) {
+        String findMethod = json.getString("type");
+        String target = json.getString("target");
 
+        By desired = getDesiredElement(findMethod, target);
+
+        if (desired == null) {
+            System.out.println("Cannot find element");
+            return;
+        }
+
+        String res = driver.findElement(getDesiredElement(findMethod, target)).getCssValue("visibility");
+        System.out.println("Target element is " + res);
     }
 
+    /**
+     * Запуск определенного теста
+     * @param action - действие необходимое совершить (do.concat(action) = название требуемого метода)
+     * @param obj - параметры для метода
+     */
     private void doAction(String action, JSONObject obj) {
         try {
             Method invokedMethod = this.getClass().getDeclaredMethod("do".concat(firstUpperCase(action)), obj.getClass());
@@ -123,6 +209,10 @@ public class JsonTask {
         }
     }
 
+    /**
+     * Дублирующий код
+     * @see DefaultDriverLoader
+     */
     private String firstUpperCase(String str) {
         if (str == null || str.isEmpty())
             throw new IllegalArgumentException("Empty string");
