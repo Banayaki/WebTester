@@ -1,6 +1,10 @@
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -17,6 +21,7 @@ public class DefaultDriverLoader implements DriverLoader {
     private List<String> supportedBrowserList = Arrays.asList(
             "chrome"
     );
+//    private ChromeDriverService googleService;
 
     public DefaultDriverLoader() {
         setupEnvironment();
@@ -24,6 +29,7 @@ public class DefaultDriverLoader implements DriverLoader {
 
     /**
      * Проверяет поддерживается ли данный браузер
+     *
      * @param browserName - название браузера
      * @return - true если браузер поддерживается
      */
@@ -33,6 +39,7 @@ public class DefaultDriverLoader implements DriverLoader {
 
     /**
      * Метод возвращающий драйвер указанного браузера
+     *
      * @param browserName - запрашиваемый браузер
      * @return - драйвер указанного браузера
      */
@@ -45,13 +52,31 @@ public class DefaultDriverLoader implements DriverLoader {
 
     /**
      * Устанавливает необходимые свойства (путь до драйвера)
+     * Jar adaptation
      */
     private void setupEnvironment() {
-        System.setProperty("webdriver.chrome.driver", "driver/chromedriver");
+        // native version
+        // System.setProperty("webdriver.chrome.driver", "driver/chromedriver");
+        try {
+            InputStream stream = getClass().getResourceAsStream("/driver/chromedriver");
+
+            File driverFile = File.createTempFile("chromedriver", "");
+            driverFile.deleteOnExit();
+
+            FileUtils.copyInputStreamToFile(stream, driverFile);
+
+            if (!driverFile.canExecute())
+                driverFile.setExecutable(true);
+
+            System.setProperty("webdriver.chrome.driver", driverFile.getPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Метод создающий WebDriver, внутри используется рефлексия, для поддержки добавления новых браузеров
+     *
      * @param name - название браузера
      * @return - WebDriver
      */
@@ -68,6 +93,7 @@ public class DefaultDriverLoader implements DriverLoader {
 
     /**
      * Первую букву в upperCase
+     *
      * @param str - входная строка
      * @return - входная строка, в которой первая буква - заглавная
      */

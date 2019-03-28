@@ -125,6 +125,7 @@ public class JsonTask {
             Method method = By.class.getMethod(findMethod, String.class);
             desired = (By) method.invoke(null, target);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            System.err.println("Unsupported locator type");
             e.printStackTrace();
         }
 
