@@ -60,7 +60,7 @@ public class DefaultDriverLoader implements DriverLoader {
         try {
             InputStream stream = getClass().getResourceAsStream("/driver/chromedriver");
 
-            File driverFile = File.createTempFile("chromedriver", "");
+            File driverFile = File.createTempFile("chromedriver", ".exe");
             driverFile.deleteOnExit();
 
             FileUtils.copyInputStreamToFile(stream, driverFile);
@@ -70,7 +70,7 @@ public class DefaultDriverLoader implements DriverLoader {
 
             System.setProperty("webdriver.chrome.driver", driverFile.getPath());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
@@ -86,7 +86,8 @@ public class DefaultDriverLoader implements DriverLoader {
             return (WebDriver) invokedMethod.invoke(this);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             System.err.println(e.getMessage());
-            e.printStackTrace();
+            System.err.println("Can't load driver");
+            System.exit(-1);
         }
         return null;
     }

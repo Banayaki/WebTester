@@ -6,6 +6,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +36,7 @@ public class JsonTask {
      * Драйвер целевого браузера
      */
     private WebDriver driver;
+    private WebDriverWait wait;
 
     /**
      * @param configPath   - путь до конфигурации тестирования
@@ -82,6 +85,7 @@ public class JsonTask {
             throw new NullPointerException("Test configuration not loaded");
 
         driver = driverLoader.getWebDriverFor((String) options.get("browser"));
+        wait = new WebDriverWait(driver, 10);
 
         parseTask();
         driver.quit();
@@ -126,7 +130,6 @@ public class JsonTask {
             desired = (By) method.invoke(null, target);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             System.err.println("Unsupported locator type");
-            e.printStackTrace();
         }
 
         return desired;
@@ -140,7 +143,7 @@ public class JsonTask {
         String findMethod = json.getString("type");
         String target = json.getString("target");
 
-        driver.findElement(getDesiredElement(findMethod, target)).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(getDesiredElement(findMethod, target))).click();
     }
 
     /**
@@ -172,7 +175,7 @@ public class JsonTask {
         try {
             FileUtils.copyFile(tmp, new File(json.getString("fileName").concat(".png")));
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 

@@ -5,7 +5,7 @@
   "task": [
     {
       "action": "openUrl",
-      "url": "https://google.com"
+      "url": "https://google.ru"
     },
     {
       "action": "setValue",
@@ -23,7 +23,7 @@
     {
       "action": "click",
       "type": "xpath",
-      "target": "//*[@id=\"rso\"]/div/div/div[1]/div/div/div[1]/a/h3",
+      "target": "//*[@id=\"rso\"]/div/div/div[2]/div/div/div[1]/a[1]/h3",
       "desc": "Click first result"
     },
     {
