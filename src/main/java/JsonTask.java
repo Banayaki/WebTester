@@ -152,7 +152,7 @@ public class JsonTask {
         String target = json.getString("target");
         String value = json.getString("value");
 
-        driver.findElement(getDesiredElement(findMethod, target)).sendKeys(value);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(getDesiredElement(findMethod, target))).sendKeys(value);
     }
 
     /**
