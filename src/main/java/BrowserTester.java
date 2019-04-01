@@ -10,6 +10,7 @@ public class BrowserTester {
      *             args[1] - путь до конфига теста
      */
     public static void main(String[] args) {
+
         ArgParser argParser = new ArgParser(args);
         DriverLoader driverLoader = new DefaultDriverLoader();
 

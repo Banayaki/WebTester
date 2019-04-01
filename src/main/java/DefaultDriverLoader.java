@@ -58,7 +58,14 @@ public class DefaultDriverLoader implements DriverLoader {
         // native version
         // System.setProperty("webdriver.chrome.driver", "driver/chromedriver");
         try {
-            InputStream stream = getClass().getResourceAsStream("/driver/chromedriver");
+            InputStream stream = null;
+
+            if (System.getProperty("os.name").equals("Windows"))
+                stream = getClass().getResourceAsStream("/driver/win/chromedriver.exe");
+            else if (System.getProperty("os.name").equals("Linux")) {
+                stream = getClass().getResourceAsStream("/driver/linux/chromedriver");
+            } else
+                System.exit(-1);
 
             File driverFile = File.createTempFile("chromedriver", ".exe");
             driverFile.deleteOnExit();

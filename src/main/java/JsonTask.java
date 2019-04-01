@@ -2,10 +2,7 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -186,8 +183,13 @@ public class JsonTask {
     private void doCheckElementVisible(JSONObject json) {
         String findMethod = json.getString("type");
         String target = json.getString("target");
+        By desired = null;
 
-        By desired = getDesiredElement(findMethod, target);
+        try {
+            desired = getDesiredElement(findMethod, target);
+        } catch (Exception e) {
+            System.err.println(e.getCause().getMessage());
+        }
 
         if (desired == null) {
             System.out.println("Cannot find element");
@@ -196,6 +198,31 @@ public class JsonTask {
 
         String res = driver.findElement(getDesiredElement(findMethod, target)).getCssValue("visibility");
         System.out.println("Target element is " + res);
+    }
+
+    private void doOpenLink(JSONObject json) {
+        String findMethod = json.getString("type");
+        String target = json.getString("target");
+
+        String findElemFunction = getDocumentFindFunction(findMethod, target);
+
+        ((JavascriptExecutor) driver).executeScript(findElemFunction.concat(".setAttribute('target', 'self');"));
+        String res = driver.findElement(getDesiredElement(findMethod, target)).getAttribute("target");
+        System.out.println("Target element is " + res);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(getDesiredElement(findMethod, target))).click();
+    }
+
+    private String getDocumentFindFunction(String method, String target) {
+        if (method.equals("xpath")) {
+            return "document.evaluate('"
+                    .concat(target)
+                    .concat("', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue");
+        } else if (method.equals("cssSelector")) {
+            return "document.querySelector('".concat(target).concat("')");
+        } else if (method.equals("id")) {
+
+        }
+        return "";
     }
 
     /**
